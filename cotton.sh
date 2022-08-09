@@ -1,15 +1,34 @@
 #!/bin/env bash
 function execute {
-    [ $COTTON_EXECUTE != TRUE ] && return;
-    [ "$1" == 'help' ] && echo 'To do' && return;
+    [ $COTTON_EXECUTE != TRUE ] && return 0;
+    if [ "$1" == 'help' ]
+    then
+        echo 'This function run the content of .cotton_execute into the current folder, command:';
+        echo '';
+        echo 'execute [clear|help] <path>';
+        echo '';
+        echo 'Arguments:';
+        echo '';
+        echo '- help: Shows the help of the command';
+        echo '- clear: Clear the shell before execute .cotton_execute';
+        return 0;
+    fi
+    EXECUTE_CLEAR=FALSE;
+    if [ "$1" == 'clear' ]
+    then
+        EXECUTE_CLEAR=TRUE;
+        shift;
+    fi
     EXECUTE_PATH=`[[ -f "$1" ]] && echo $1 || echo "./.cotton_execute"`;
     if [[ -f $EXECUTE_PATH ]]
     then
-        [ "$1" == 'clear' ] && clear;
-        source $EXECUTE_PATH
+        [ $EXECUTE_CLEAR == TRUE ] && clear;
+        source $EXECUTE_PATH;
     else
         echo 'Nothing to execute';
     fi
+    unset EXECUTE_PATH;
+    unset EXECUTE_CLEAR;
 }
 function cd {
     if [ $COTTON_CD != TRUE ]
@@ -17,23 +36,49 @@ function cd {
         builtin cd $*;
         return $?;
     fi
+    if [ "$1" == 'help' ]
+    then
+        echo 'This function overwrite the behavior of the cd command to add the execution of something when entering or exiting a folder with .cotton cd, command:';
+        echo '';
+        echo 'cd [help]';
+        echo '';
+        echo 'Arguments:';
+        echo '';
+        echo '- help: Shows the help of the command';
+        return 0;
+    fi
     CD_PATH='./.cotton_cd';
     if [[ -f $CD_PATH ]]
     then
         source $CD_PATH 'goingout';
     fi
     builtin cd $@;
-    EXIT_CODE=$?;
+    CD_EXIT_CODE=$?;
     if [[ -f $CD_PATH ]]
     then
         source $CD_PATH 'goingin';
     fi
-    return $EXIT_CODE;
+    unset $CD_PATH;
+    return $CD_EXIT_CODE;
 }
 function cotton {
     if [ "$1" == 'cd' ]
     then
-        [ "$2" == 'help' ] && echo -e 'To do' && return;
+        if [ "$2" == 'help' ]
+        then
+            echo 'This command create a template to use with the cd function, command:';
+            echo '';
+            echo 'cotton cd <executable|python_environment|path>';
+            echo '';
+            echo 'Options:';
+            echo '';
+            echo 'executable: This template is useful to overwrite an executable with other';
+            echo 'python_environment: This template is usefull to activate/deactivate a pyhton environmemt';
+            echo 'path: Add something to the shell PATH';
+            echo '';
+            echo "if you don't send anything, it create a simple file with in/out conditionals";
+            return 0;
+        fi
         CD_PATH='./.cotton_cd';
         if [ -f $CD_PATH ]
         then
@@ -53,9 +98,17 @@ function cotton {
             CD_CONTENT="if [ \"\$1\" == 'goingin' ]\nthen\n\techo 'going in';\nelif [ \"\$1\" == 'goingout' ]\nthen\n\techo 'going out';\nfi";
         fi
         echo -e $CD_CONTENT > $CD_PATH;
+        unset CD_CONTENT;
+        unset CD_PATH;
     elif [ "$1" == 'execute' ]
     then
-        [ "$2" == 'help' ] && echo -e 'execute -> Create the execute file, it creates it in the current directory if any is specified' && return;
+        if [ "$2" == 'help' ]
+        then 
+            echo 'This command create a template to use with the execute function, command:';
+            echo '';
+            echo 'cotton execute';
+            return 0;
+        fi
         EXECUTE_PATH="./.cotton_execute";
         if [ -f $EXECUTE_PATH ]
         then
@@ -66,28 +119,64 @@ function cotton {
         fi
     elif [ "$1" == 'info' ]
     then
-        [ "$2" == 'help' ] && echo -e 'info -> Display the information about cotton' && return;
+        if [ "$2" == 'help' ]
+        then 
+            echo 'Display the information about cotton, command:';
+            echo '';
+            echo 'cotton info';
+            return 0;
+        fi 
         echo 'Repository: https://github.com/RobertoRojas/cotton';
         echo 'Author: Roberto Rojas';
     elif [ "$1" == 'info' ]
     then
-        [ "$2" == 'help' ] && echo -e 'version -> Display the version of cotton' && return;
+        if [ "$2" == 'help' ]
+        then 
+            echo 'Display the version of cotton, command:';
+            echo '';
+            echo 'cotton info';
+            return 0;
+        fi
         echo "cotton v$COTTON_VERSION";
     else
-        echo -e '\ncotton OPTION [help]';
-        echo -e '\nOptions:\n';
+        echo 'Cotton create templates or display information, command: ';
+        echo '';
+        echo 'cotton <option> [help]';
+        echo '';
+        echo 'Options: ';
+        echo '';
         declare -a OPTIONS=(
             'info'
             'version'
             'execute'
+            'cd'
         );
         for o in "${OPTIONS[@]}"
         do
-            cotton $o help;
+            echo "- $o";
+            #cotton $o help;
         done
+        echo '';
+        echo 'You can get more  information about how to use, command:';
+        echo '';
+        echo '<command> help';
+        echo '';
+        echo 'Commands';
+        echo '';
         for o in "${OPTIONS[@]:2}"
         do
-            $o help;
+            echo "- $o";
+        done
+        echo '';
+        echo 'You can deactivate any command, changing the value of an environemt variable from TRUE to FALSE, variable:';
+        echo '';
+        echo 'COTTON_<command>';
+        echo '';
+        echo 'Variables:';
+        echo '';
+        for o in "${OPTIONS[@]:2}"
+        do
+            echo "- COTTON_${o^^}";
         done
     fi
 }
