@@ -7,3 +7,5 @@ COTTON_PATH="$HOME/.cotton";
 COTTON_REMOTE_FILE="https://raw.githubusercontent.com/RobertoRojas/cotton/main/cotton.sh";
 curl -s $COTTON_REMOTE_FILE -o $COTTON_PATH > /dev/null;
 echo 'Cotton installed!';
+unset COTTON_REMOTE_FILE;
+unset COTTON_PATH;
