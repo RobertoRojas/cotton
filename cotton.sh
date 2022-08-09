@@ -1,4 +1,5 @@
 #!/bin/env bash
+
 function execute {
     [ $COTTON_EXECUTE != TRUE ] && return 0;
     if [ "$1" == 'help' ]
@@ -154,7 +155,6 @@ function cotton {
         for o in "${OPTIONS[@]}"
         do
             echo "- $o";
-            #cotton $o help;
         done
         echo '';
         echo 'You can get more  information about how to use, command:';
