@@ -39,7 +39,7 @@ function cd {
     fi
     if [ "$1" == 'help' ]
     then
-        echo 'This function overwrite the behavior of the cd command to add the execution of something when entering or exiting a folder with .cotton cd, command:';
+        echo 'This function overwrite the behavior of the cd command to add the execution of something when entering or exiting a folder with .cotton_cd, command:';
         echo '';
         echo 'cd [help]';
         echo '';
